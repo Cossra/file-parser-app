@@ -2,6 +2,7 @@
   "name": "receipt-tracker-build",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
     "dev": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "next dev",
@@ -22,6 +23,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "1.26.0-alpha.8",
+    "inngest": "^3.40.1",
     "lucide-react": "^0.537.0",
     "next": "15.2.3",
     "react": "^19.0.0",

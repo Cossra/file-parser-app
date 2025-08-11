@@ -1,16 +1,22 @@
 "use client";
 
-import { SchematicEmbed as SchematicEmbedComponent } from "@schematichq/schematic-components";
+import {
+  EmbedProvider,
+  SchematicEmbed as SchematicEmbedComponent,
+} from "@schematichq/schematic-components";
 
-
-function SchematicEmbed({
-    accessToken,
-    componentId,
+export default function PortalEmbed({
+  componentId,
+  token,
 }: {
-    accessToken: string;
-    componentId: string;
+  componentId?: string;
+  token: string;
 }) {
-    return <SchematicEmbedComponent accessToken={accessToken} id={componentId} />;
-}
+  if (!componentId) return null;
 
-export default SchematicEmbed;
+  return (
+    <EmbedProvider>
+      <SchematicEmbedComponent id={componentId} accessToken={token} />
+    </EmbedProvider>
+  );
+}

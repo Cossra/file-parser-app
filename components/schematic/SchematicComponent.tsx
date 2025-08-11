@@ -32,8 +32,6 @@ export default function SchematicComponent({
   }
 
   return (
-    <EmbedProvider apiKey={process.env.NEXT_PUBLIC_SCHEMATIC_KEY! + Date.now()}>
-      <SchematicEmbedComponent id={componentId} accessToken={token} />
-    </EmbedProvider>
+    <SchematicEmbedComponent id={componentId} accessToken={token} />
   );
 }

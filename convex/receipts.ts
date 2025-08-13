@@ -15,7 +15,7 @@ export const generateUploadUrl = mutation({
 export const storeReceipt = mutation({
     args: {
         userId: v.string(),
-        fieldId: v.id("_storage"),
+        fileId: v.id("_storage"),
         fileName: v.string(),
         size: v.number(),
         mimeType: v.string(),
@@ -34,8 +34,8 @@ export const storeReceipt = mutation({
             merchantName: undefined,
             merchantAddress: undefined,
             merchantContact: undefined,
-            transactionDate: undefined,
-            transactionAmount: undefined,
+            date: undefined,
+            amount: undefined,
             currency: undefined,
             items: [],
         });
@@ -83,4 +83,56 @@ export const getReceiptById = query({
         
         return receipt;
     },
-})
+});
+
+// Generate a URL to download a receipt file
+export const getReceiptDownLoadUrl = query({
+    args: {
+        fileId: v.id("_storage"),
+    },
+    handler: async (ctx, args) => {
+        // Get a temp URL that is used to download the file
+        return await ctx.storage.getUrl(args.fileId);
+    },
+});
+
+// Update a receipt with extracted data
+export const updateReceiptWithExtractedData = mutation({
+  args: {
+    id: v.id("receipts"),
+
+    // Optional so you can patch only what you have
+    fileDisplayName: v.optional(v.string()),
+    merchantName: v.optional(v.string()),
+    merchantAddress: v.optional(v.string()),
+    merchantContact: v.optional(v.string()),
+    date: v.optional(v.string()),          // was transactionDate
+    amount: v.optional(v.number()),        // was transactionAmount (and string)
+    currency: v.optional(v.string()),
+    receiptSummary: v.optional(v.string()),
+    items: v.optional(
+      v.array(
+        v.object({
+          name: v.optional(v.string()),
+          quantity: v.optional(v.number()),
+          unitPrice: v.optional(v.number()),
+          totalPrice: v.optional(v.number()),
+        })
+      )
+    ),
+    status: v.optional(v.string()),        // in case you want to flip pending->processed
+  },
+  handler: async (ctx, args) => {
+    const { id, ...patch } = args;
+
+    // Verify the receipt exists
+    const receipt = await ctx.db.get(id);
+    if (!receipt) {
+      throw new Error("Receipt not found");
+    }
+
+    // Apply patch with only provided fields
+    await ctx.db.patch(id, patch);
+    return id;
+  },
+});

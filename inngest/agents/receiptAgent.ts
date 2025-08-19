@@ -3,14 +3,14 @@ import { z } from "zod";
 import { openai } from "inngest";
 
 // Tool: documentParser
-const documentParser = createTool({
+export const documentParser = createTool({
   name: "document-parser",
   description:
     "Reads a PDF file from a URL and attempts to pull out structured receipt details.",
   parameters: z.object({
     pdfUrl: z.string().describe("Direct link to the PDF file to be parsed."),
   }),
-  handler: async ({ pdfUrl }, { step }) => {
+  handler: async ({ pdfUrl }, { step }: { step?: any }) => {
     return await step?.ai.infer(
       "receipt-extraction",
       {
@@ -25,10 +25,7 @@ const documentParser = createTool({
               content: [
                 {
                   type: "document",
-                  source: {
-                    type: "url",
-                    url: pdfUrl,
-                  },
+                  source: { type: "url", url: pdfUrl },
                 },
                 {
                   type: "text",
@@ -46,35 +43,26 @@ const documentParser = createTool({
             },
           ],
         },
-      } as any // 👈 cast fixes TS red squiggles
+      } as any
     );
   },
 });
 
-
 // Agent: receiptAgent
 export const receiptAgent = createAgent({
   name: "Receipt Data Agent",
-  description:
-    "Extracts and normalizes key information from uploaded receipts into a consistent format.",
+  description: "Extracts and normalizes key information from uploaded receipts.",
   system: `You are a utility agent designed to transform receipt documents into clean JSON.
 Follow these principles:
-1. Always identify merchant details (store name, address, contact).
-2. Capture transaction information (date, payment method, receipt number).
-3. List items purchased, including name, quantity, unit price, and total.
-4. Provide totals with currency, taxes, and final amount.
-5. Correct obvious OCR mistakes and standardize formats (dates, amounts).
-6. If details are missing, mark them clearly rather than inventing values.`,
-
-  // ✅ Keep openai() but cast to any
+1. Always identify merchant details.
+2. Capture transaction information.
+3. List items purchased.
+4. Provide totals with currency.
+5. Correct OCR mistakes.
+6. Don’t invent data if missing.`,
   model: openai({
     model: "gpt-4o-mini",
-    defaultParameters: {
-      max_completion_tokens: 2000,
-    },
+    defaultParameters: { max_completion_tokens: 2000 },
   }) as any,
-
   tools: [documentParser],
 });
-
-

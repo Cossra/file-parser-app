@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { api } from "@/convex/_generated/api";
 import convex from "@/lib/convexClient"; // Convex (HTTP) client instance
 import { getFileDownloadUrl } from "./getFileDownloadUrl";
+import { Inngest } from "inngest";   // 👈 add this
 
 export async function uploadPDF(formData: FormData) {
   const user = await currentUser();
@@ -31,7 +32,7 @@ export async function uploadPDF(formData: FormData) {
             "Content-Type": file.type,
         },
         body: new Uint8Array(arrayBuffer),
-    })
+    });
 
     if (!uploadResponse.ok) {
         throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
@@ -52,15 +53,31 @@ export async function uploadPDF(formData: FormData) {
     // Generate the file URL
     const fileUrl = await getFileDownloadUrl(storageId);
 
-    // TODO: Initiate ingest agents..
+    // 👉 Send event to Inngest
+    const inngestClient = new Inngest({
+      id: "receipt-tracker-app", // 👈 make sure this matches your Inngest app name
+      eventKey: process.env.INNGEST_EVENT_KEY!,
+    });
+
+    await inngestClient.send({
+      name: "app/receipt.uploaded", // 👈 must match your route.ts function trigger
+      data: {
+        receiptId,
+        fileId: storageId,
+        fileName: file.name,
+        mimeType: file.type,
+        userId: user.id,
+      },
+    });
 
     return {
-        success: true,
-        data: {
-            receiptId,
-            fileName: file.name
-        }
-    }
+      success: true,
+      data: {
+        receiptId,
+        fileName: file.name,
+        fileUrl,   // 👈 keep returning this for your UI
+      },
+    };
 
   } catch (error) {
     console.error("Server action upload error:", error);

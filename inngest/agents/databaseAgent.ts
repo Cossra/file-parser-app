@@ -29,7 +29,7 @@ const SaveToDbParams = z.object({
 type SaveToDbParams = z.infer<typeof SaveToDbParams>;
 
 // Tool
-const saveToDatabaseTool = createTool({
+export const saveToDatabaseTool = createTool({
   name: "save-to-database",
   description: "Saves the given data to the Convex database.",
   parameters: SaveToDbParams,
@@ -86,7 +86,7 @@ const saveToDatabaseTool = createTool({
           error: error instanceof Error ? error.message : "Unknown error",
         };
       }
-    },
+    }
 });
 
 // Agent

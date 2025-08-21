@@ -1,9 +1,7 @@
 # 📦 Receipt Tracker SaaS
-
 An AI-powered SaaS platform for managing receipts and tracking expenses, built with modern full-stack tools.
 
 ## 🚀 Tech Stack
-
 - **Frontend**: Next.js 15 (App Router)
 - **Backend**: Convex (realtime database + serverless functions)
 - **Auth**: Clerk
@@ -13,8 +11,14 @@ An AI-powered SaaS platform for managing receipts and tracking expenses, built w
 - **API Schema**: Schematic
 - **Styling**: Tailwind CSS
 
-## 📷 Features
+## 🚀 Milestone Achieved
+- Full end-to-end receipt tracking loop is functional:
+  - Upload PDF → Convex Storage
+  - Process with Inngest + OpenAI
+  - Save structured data into Convex DB
+  - Display results in Next.js frontend
 
+## 📷 Features
 - Upload receipt images
 - Extract data using AI agents
 - View and filter receipt history
@@ -22,8 +26,8 @@ An AI-powered SaaS platform for managing receipts and tracking expenses, built w
 - Subscription billing (Stripe)
 - Clerk-powered login & user management
 
-## 🛠 Setup
 
+## 🛠 Setup
 ```bash
 pnpm install
 pnpm dev

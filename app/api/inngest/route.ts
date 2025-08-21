@@ -34,9 +34,15 @@ const processReceiptUpload = inngest.createFunction(
 
     // 1. Downloadable URL from Convex
     const fileUrl = await getFileDownloadUrl(fileId);
+    console.log("🔑 Convex client using URL:", process.env.NEXT_PUBLIC_CONVEX_URL);
+console.log("📥 fileId passed in:", fileId);
+
     if (!fileUrl.success) {
       return { status: "failed", reason: "Could not get file URL" };
     }
+
+    console.log("📂 File URL from Convex:", fileUrl.downloadUrl);
+
 
     // 2. Parse the PDF with the documentParser tool
     const parsed = await parseReceiptFile(fileUrl.downloadUrl!, step);

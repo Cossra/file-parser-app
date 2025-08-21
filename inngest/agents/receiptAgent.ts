@@ -1,6 +1,11 @@
 import { createAgent, createTool } from "@inngest/agent-kit";
 import { z } from "zod";
-import { openai } from "inngest";
+import OpenAI from "openai";
+import pdf from "pdf-parse";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
 
 // Tool: documentParser
 export const documentParser = createTool({
@@ -10,26 +15,34 @@ export const documentParser = createTool({
   parameters: z.object({
     pdfUrl: z.string().describe("Direct link to the PDF file to be parsed."),
   }),
-  handler: async ({ pdfUrl }, { step }: { step?: any }) => {
-    return await step?.ai.infer(
-      "receipt-extraction",
-      {
-        model: "claude-3-5-sonnet-20241022",
-        defaultParameters: {
-          max_tokens: 3000,
-        },
-        body: {
-          messages: [
-            {
-              role: "user",
-              content: [
-                {
-                  type: "document",
-                  source: { type: "url", url: pdfUrl },
-                },
-                {
-                  type: "text",
-                  text: `Please analyze this receipt and provide a structured JSON object with these fields:
+  handler: async ({ pdfUrl }) => {
+    console.log("🔎 [receiptAgent.ts] documentParser called with pdfUrl:", pdfUrl);
+
+    try {
+      // 1. Download PDF (Next.js has fetch built-in)
+      const res = await fetch(pdfUrl);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch PDF: ${res.status} ${res.statusText}`);
+      }
+
+      // 2. Convert to Buffer for pdf-parse
+      const arrayBuffer = await res.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // 3. Extract text from PDF
+      const data = await pdf(buffer);
+      console.log("📄 Extracted text preview:", data.text.slice(0, 200));
+
+      // 4. Send extracted text to OpenAI
+      console.log("🤖 [receiptAgent.ts] Calling OpenAI with model=gpt-4o-mini...");
+      console.log("🔑 [receiptAgent.ts] OPENAI_API_KEY present?", !!process.env.OPENAI_API_KEY);
+
+      const result = await client.chat.completions.create({
+        model: "gpt-4o-mini", // ✅ cheaper and plenty good for receipts
+        messages: [
+          {
+            role: "user",
+            content: `Here is the text of a receipt:\n\n${data.text}\n\nPlease provide a structured JSON object with these fields:
 {
   "merchant": { "name": "", "address": "", "contact": "" },
   "transaction": { "date": "", "receipt_number": "", "payment_method": "" },
@@ -38,13 +51,17 @@ export const documentParser = createTool({
   ],
   "totals": { "subtotal": 0, "tax": 0, "total": 0, "currency": "" }
 }`,
-                },
-              ],
-            },
-          ],
-        },
-      } as any
-    );
+          },
+        ],
+        max_completion_tokens: 1500,
+      });
+
+      console.log("✅ [receiptAgent.ts] OpenAI returned:", result.choices[0].message);
+      return result.choices[0].message;
+    } catch (err) {
+      console.error("❌ [receiptAgent.ts] Error during OpenAI call:", err);
+      throw err;
+    }
   },
 });
 
@@ -60,9 +77,5 @@ Follow these principles:
 4. Provide totals with currency.
 5. Correct OCR mistakes.
 6. Don’t invent data if missing.`,
-  model: openai({
-    model: "gpt-4o-mini",
-    defaultParameters: { max_completion_tokens: 2000 },
-  }) as any,
   tools: [documentParser],
 });

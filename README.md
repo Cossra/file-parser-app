@@ -15,14 +15,14 @@ An **AI-powered SaaS app** that parses uploaded files, extracts structured infor
 
 ## 🚀 Tech Stack
 
-- **Frontend**: Next.js 15 (App Router)  
-- **Backend**: Convex (Realtime DB + serverless functions)  
-- **Auth**: Clerk with **Google OAuth login**  
-- **Payments**: Stripe (for SaaS subscriptions)  
-- **Background Jobs**: Inngest (event-driven processing)  
-- **AI**: OpenAI API (LLM-powered file parsing & structured JSON output)  
-- **Schema Management**: Schematic  
-- **Styling**: Tailwind CSS + shadcn/ui  
+- **Frontend**: Next.js 15 (App Router) — modern framework
+- **Backend**: Convex (Realtime DB + cloud storage) — realtime backend
+- **Auth**: Clerk with **Google OAuth login**
+- **Payments**: Stripe (for SaaS subscriptions) — subscription billing
+- **Background Jobs**: Inngest (event-driven processing) — async workflows
+- **AI**: OpenAI API (LLM-powered file parsing & structured JSON output)
+- **Schema Management**: Schematic — contract enforcement 
+- **Styling**: Tailwind CSS + shadcn/ui — responsive design 
 
 ---
 

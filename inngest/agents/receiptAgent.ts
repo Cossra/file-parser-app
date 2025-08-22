@@ -3,6 +3,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import pdf from "pdf-parse";
 
+
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
